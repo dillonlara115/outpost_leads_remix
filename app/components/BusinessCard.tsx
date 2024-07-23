@@ -4,15 +4,19 @@ import React from 'react';
 import { Card, Image, Text, Group, Badge, Button, ActionIcon } from '@mantine/core';
 import { IconHeart } from '@tabler/icons-react';
 
+interface Business {
+  name: string;
+  photo: string;
+  description: string;
+  full_address: string;
+  about?: any;
+  verified: boolean;
+}
+
 interface BusinessCardProps {
-  business: {
-    name: string;
-    photo: string;
-    description: string;
-    full_address: string;
-    about?: any;
-    verified: boolean;
-  };
+  business: Business;
+  userId: string | null; // Add this line
+  searchId: string | null;
 }
 
 export const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {

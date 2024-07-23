@@ -8,7 +8,7 @@ import LocationInput from './LocationInput'
 import BusinessTypeSelect from './BusinessTypeSelect';
 import FilterAccordion from './FilterAccordion';
 import BusinessesList from './BusinessesList';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'uuid';
 
 const ownershipOptions = [
   { value: 'Identifies as Asian-owned', label: 'Identifies as Asian-owned' },
@@ -36,7 +36,7 @@ const BusinessList: React.FC = () => {
   const [selectedOwnerships, setSelectedOwnerships] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState({ id: null, query: '' });
-  
+  const { v4: uuidv4 } = uuid;
 
   useEffect(() => {
     const loadBusinessTypes = async () => {
@@ -54,7 +54,8 @@ const BusinessList: React.FC = () => {
     loadBusinessTypes();
   }, []);
 
-  const handleFetchBusinesses = async () => {
+ 
+const handleFetchBusinesses = async () => {
    setLoading(true);
    setShowFilters(false);
    const searchId = uuidv4(); // Generate a unique identifier for the search
@@ -62,28 +63,31 @@ const BusinessList: React.FC = () => {
      // Construct location string, handling missing parts gracefully
      const location = `${city ? `${city}, ` : ''}${state ? `${state  }, ` : ''}${country ? `${country}, ` : ''}${postalCode}`.trim().replace(/, $/, '');
      const data = await fetchBusinesses(location, selectedBusinessType);
-     // Assuming you want to store the searchId along with the fetched data
-     const searchData = { ...data, searchId }; 
-     setBusinesses(searchData);
-     setFilteredBusinesses(searchData); // Initially, the filtered businesses are the same as the fetched businesses
-     setShowFilters(true);
+// Assuming you want to store the searchId along with the fetched data
+const searchData = { businesses: [...data], searchId }; 
+console.log('search data',  searchData);
+setBusinesses(searchData.businesses); // Extract the businesses array
+setFilteredBusinesses(searchData.businesses); // Initially, the filtered businesses are the same as the fetched businesses
+setShowFilters(true);
+
    } catch (error) {
      console.error('Error fetching businesses:', error);
    } finally {
      setLoading(false);
    }
  };
-
+  
   useEffect(() => {
     const filtered = filterBusinesses(businesses, verifiedFilter, selectedOwnerships);
     setFilteredBusinesses(filtered);
+    console.log('filtered ', filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
   const handleSaveSearch = async () => {
 
    // Get the current user
    const user = auth.currentUser?.uid;
-   const userId = user.uid;
+   const userId = user;
     // Now use userId in your function logic
     console.log("Saving search for userId:", userId);
     try {
@@ -125,10 +129,11 @@ const BusinessList: React.FC = () => {
         />
       )}
       {loading ? (
-        <Loader />
-      ) : (
-        <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} />
-      )}
+  <Loader />
+) : (
+  <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={search.id} /> 
+)}
+
     </Container>
   );
 };
