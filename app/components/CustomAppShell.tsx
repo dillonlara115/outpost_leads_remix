@@ -8,7 +8,6 @@ import {
   Title,
   Text,
   NavLink,
-  Skeleton,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from "@remix-run/react";
@@ -34,11 +33,6 @@ const CustomAppShell: React.FC = () => {
           <NavLink component="a" href="/" label="Fetch Businesses" />
           <NavLink component="a" href="/saved" label="Saved Searches" />
           <NavLink component="a" href="/signup" label="Sign Up" />
-          {Array(15)
-            .fill(0)
-            .map((_, index) => (
-              <Skeleton key={index} h={28} mt="sm" animate={false} />
-            ))}
         </ScrollArea>
       </AppShell.Navbar>
       <AppShell.Main>

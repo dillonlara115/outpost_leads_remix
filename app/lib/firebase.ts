@@ -1,22 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+   apiKey: "AIzaSyC3C-SGWKjR4W5EWAAyRuUN7xxxuQ3SxMQ",
+   authDomain: "outpostleads-8d880.firebaseapp.com",
+   projectId: "outpostleads-8d880",
+   storageBucket: "outpostleads-8d880.appspot.com",
+   messagingSenderId: "283284414407",
+   appId: "1:283284414407:web:c80dc463a7832a7eb083e2",
+   measurementId: "G-NQW58WF34R"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, db, googleProvider, signInWithPopup };
+export { auth, db, googleProvider, signInWithPopup, signOut };

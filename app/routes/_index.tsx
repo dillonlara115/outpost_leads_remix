@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Welcome } from "~/components/Welcome/Welcome";
-import { ColorSchemeToggle } from "~/components/ColorSchemeToggle/ColorSchemeToggle";
+import Signup from '~/components/signup';
+
 
 export const meta: MetaFunction = () => {
   return [
@@ -12,8 +12,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div>
-      <Welcome />
-      <ColorSchemeToggle />
+      <Signup />
     </div>
   );
 }

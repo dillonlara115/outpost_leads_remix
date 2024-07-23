@@ -1,21 +1,18 @@
-import React, { useState } from 'react';
-import { Container, Title, TextInput, Button, Text, Group } from '@mantine/core';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '~/lib/firebase';
+import React, { useState, useEffect } from 'react';
+import { Container, Title, Button, Text, Group } from '@mantine/core';
+import { auth, googleProvider, signInWithPopup, sigjnOut } from '~/lib/firebase';
 
 const Signup: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [user, setUser] = useState<any>(null);
   const [error, setError] = useState('');
 
-  const handleSignup = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      setError('');
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleGoogleSignup = async () => {
     try {
@@ -26,25 +23,34 @@ const Signup: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        setUser(null);
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
+  };
+
   return (
     <Container>
-      <Title order={2}>Sign Up</Title>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.currentTarget.value)}
-      />
-      <TextInput
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.currentTarget.value)}
-      />
-      <Group mt="md">
-        <Button onClick={handleSignup}>Sign Up with Email</Button>
-        <Button onClick={handleGoogleSignup}>Sign Up with Google</Button>
-      </Group>
-      {error && <Text color="red">{error}</Text>}
+      {user ? (
+        <>
+          <Title order={2}>Welcome, {user.displayName}</Title>
+          <Group mt="md">
+            <Button onClick={handleLogout}>Log Out</Button>
+          </Group>
+        </>
+      ) : (
+        <>
+          <Title order={2}>Sign Up</Title>
+          <Group mt="md">
+            <Button onClick={handleGoogleSignup}>Sign Up with Google</Button>
+          </Group>
+          {error && <Text color="red">{error}</Text>}
+        </>
+      )}
     </Container>
   );
 };
