@@ -84,14 +84,13 @@ setShowFilters(true);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
   const handleSaveSearch = async () => {
-
-   // Get the current user
-   const user = auth.currentUser?.uid;
-   const userId = user;
+    // Get the current user
+    const user = auth.currentUser?.uid;
+    const userId = user || ''; // Provide a default value of ''
     // Now use userId in your function logic
     console.log("Saving search for userId:", userId);
     try {
-      await saveSearch(userId, search.id, businesses); // Pass search.id
+      await saveSearch(userId, search.id || '', businesses); // Pass search.id with a default value of ''
       console.log('Search saved successfully');
     } catch (error) {
       console.error('Error saving search:', error);
