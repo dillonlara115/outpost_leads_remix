@@ -30,7 +30,7 @@ const CustomAppShell: React.FC = () => {
       <AppShell.Navbar p="md">
         <ScrollArea style={{ height: '100%' }}>
           <Title order={4}>Menu</Title>
-          <NavLink component="a" href="/" label="Fetch Businesses" />
+          <NavLink component="a" href="/businesses" label="Fetch Businesses" />
           <NavLink component="a" href="/saved" label="Saved Searches" />
           <NavLink component="a" href="/signup" label="Sign Up" />
         </ScrollArea>

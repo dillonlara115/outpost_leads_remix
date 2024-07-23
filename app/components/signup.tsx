@@ -38,6 +38,7 @@ const Signup: React.FC = () => {
       {user ? (
         <>
           <Title order={2}>Welcome, {user.displayName}</Title>
+          <pre>{user.uid}</pre>
           <Group mt="md">
             <Button onClick={handleLogout}>Log Out</Button>
           </Group>
