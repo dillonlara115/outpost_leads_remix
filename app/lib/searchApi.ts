@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { doc, setDoc, getFirestore } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc, serverTimestamp, getFirestore } from 'firebase/firestore'; // Import Firestore functions
 
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
@@ -11,8 +11,9 @@ export const saveSearch = async (userId: string, search: string, businesses: Bus
 
     // Save the search data to the document
     await setDoc(searchDocRef, {
-      search, // Use searchId instead of searchName
+      id: search,
       businesses,
+      createdAt: serverTimestamp(),
     });
 
     return 'Search saved successfully!';
