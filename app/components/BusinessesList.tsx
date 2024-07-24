@@ -6,7 +6,7 @@ import { BusinessCard } from './BusinessCard';
 interface BusinessesListProps {
   businesses: Business[];
   userId: string | null;
-  searchId: string | null; // Add searchId to the props
+  searchId: string | null;
 }
 
 const BusinessesList: React.FC<BusinessesListProps> = ({ businesses, userId, searchId }) => {
@@ -14,7 +14,7 @@ const BusinessesList: React.FC<BusinessesListProps> = ({ businesses, userId, sea
     <>
       {businesses.length ? (
         businesses.map((business, index) => (
-          <BusinessCard key={index} business={business} userId={userId} searchId={searchId} /> // Pass searchId to BusinessCard
+          <BusinessCard key={index} business={business} userId={userId} searchId={searchId} />
         ))
       ) : (
         <Text>No businesses found</Text>

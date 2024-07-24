@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Container, Title, Loader } from '@mantine/core';
 import { fetchBusinesses, filterBusinesses, Business } from '../lib/api';
 import { fetchBusinessTypes, BusinessType } from '../lib/businessTypesApi';
-import { saveSearch } from '../lib/searchApi'; // Adjust the import path to your searches API   
-import { auth } from '../lib/firebase'; // Adjust the import path to your Firebase config
-import LocationInput from './LocationInput'
+import { saveSearch } from '../lib/searchApi';
+import { auth } from '../lib/firebase';
+import LocationInput from './LocationInput';
 import BusinessTypeSelect from './BusinessTypeSelect';
 import FilterAccordion from './FilterAccordion';
 import BusinessesList from './BusinessesList';
-import uuid from 'uuid';
+import pkg from 'uuid';
 
 const ownershipOptions = [
   { value: 'Identifies as Asian-owned', label: 'Identifies as Asian-owned' },
@@ -35,8 +35,8 @@ const BusinessList: React.FC = () => {
   const [verifiedFilter, setVerifiedFilter] = useState('all'); // all, verified, not_verified
   const [selectedOwnerships, setSelectedOwnerships] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [search, setSearch] = useState({ id: null, query: '' });
-  const { v4: uuidv4 } = uuid;
+  const [search, setSearchId] = useState({ id: null, query: '' });
+  const { v4: uuidv4 } = pkg;
 
   useEffect(() => {
     const loadBusinessTypes = async () => {
@@ -54,48 +54,55 @@ const BusinessList: React.FC = () => {
     loadBusinessTypes();
   }, []);
 
- 
-const handleFetchBusinesses = async () => {
-   setLoading(true);
-   setShowFilters(false);
-   const searchId = uuidv4(); // Generate a unique identifier for the search
-   try {
-     // Construct location string, handling missing parts gracefully
-     const location = `${city ? `${city}, ` : ''}${state ? `${state  }, ` : ''}${country ? `${country}, ` : ''}${postalCode}`.trim().replace(/, $/, '');
-     const data = await fetchBusinesses(location, selectedBusinessType);
-// Assuming you want to store the searchId along with the fetched data
-const searchData = { businesses: [...data], searchId }; 
-console.log('search data',  searchData);
-setBusinesses(searchData.businesses); // Extract the businesses array
-setFilteredBusinesses(searchData.businesses); // Initially, the filtered businesses are the same as the fetched businesses
-setShowFilters(true);
+  const handleFetchBusinesses = async () => {
+    setLoading(true);
+    setShowFilters(false);
+    const searchId = uuidv4(); // Generate a unique identifier for the search
+    try {
+      // Construct location string, handling missing parts gracefully
+      const location = `${city ? `${city}, ` : ''}${state ? `${state}, ` : ''}${country ? `${country}, ` : ''}${postalCode}`.trim().replace(/, $/, '');
+      const data = await fetchBusinesses(location, selectedBusinessType);
+      // Assuming you want to store the searchId along with the fetched data
+      const searchData = { businesses: data, searchId };
+      console.log('search data', searchData);
+      setBusinesses(searchData.businesses); // Extract the businesses array
+      setFilteredBusinesses(searchData.businesses); // Initially, the filtered businesses are the same as the fetched businesses
+      setShowFilters(true);
+      setSearchId(searchData.searchId);
+    } catch (error) {
+      console.error('Error fetching businesses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-   } catch (error) {
-     console.error('Error fetching businesses:', error);
-   } finally {
-     setLoading(false);
-   }
- };
-  
   useEffect(() => {
     const filtered = filterBusinesses(businesses, verifiedFilter, selectedOwnerships);
     setFilteredBusinesses(filtered);
     console.log('filtered ', filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
-  const handleSaveSearch = async () => {
-    // Get the current user
-    const user = auth.currentUser?.uid;
-    const userId = user || ''; // Provide a default value of ''
-    // Now use userId in your function logic
-    console.log("Saving search for userId:", userId);
-    try {
-      await saveSearch(userId, search.id || '', businesses); // Pass search.id with a default value of ''
-      console.log('Search saved successfully');
-    } catch (error) {
-      console.error('Error saving search:', error);
-    }
-  };
+const handleSaveSearch = async (searchId) => {
+  const user = auth.currentUser?.uid;
+
+  console.log('search object at the start of handleSaveSearch:', search);
+
+  if (!user || !search || !businesses) {
+    console.log('user', user);
+    console.log('search.id', search);
+    console.log('businesses', businesses);
+    console.error("Missing required data: user, search ID, or businesses are null or undefined.");
+    return; // Exit the function if any required data is missing
+  }
+
+  console.log("Saving search for userId:", user);
+  try {
+    await saveSearch(user, search, businesses);
+    console.log('Search saved successfully');
+  } catch (error) {
+    console.error('Error saving search:', error);
+  }
+};
 
   return (
     <Container>
@@ -128,11 +135,10 @@ setShowFilters(true);
         />
       )}
       {loading ? (
-  <Loader />
-) : (
-  <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={search.id} /> 
-)}
-
+        <Loader />
+      ) : (
+        <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={search.id} />
+      )}
     </Container>
   );
 };

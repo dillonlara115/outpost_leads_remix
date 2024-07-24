@@ -4,14 +4,14 @@ import { doc, setDoc, getFirestore } from 'firebase/firestore'; // Import Firest
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
 
-export const saveSearch = async (userId: string, searchId: string, businesses: BusinessType[]): Promise<string> => {
+export const saveSearch = async (userId: string, search: string, businesses: BusinessType[]): Promise<string> => {
    try {
     // Create a unique document path for the search
-    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
+    const searchDocRef = doc(db, 'users', userId, 'savedSearches', search);
 
     // Save the search data to the document
     await setDoc(searchDocRef, {
-      searchId, // Use searchId instead of searchName
+      search, // Use searchId instead of searchName
       businesses,
     });
 

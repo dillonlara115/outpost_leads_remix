@@ -8,9 +8,10 @@ interface FilterAccordionProps {
   setSelectedOwnerships: (value: string[]) => void;
   ownershipOptions: { value: string; label: string }[];
   handleSaveSearch: () => void;
+  searchId: string; 
 }
 
-const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch }) => (
+const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch, searchId}) => (
     <Accordion label="Filters">
       <div style={{ marginBottom: '1rem' }}>
         <RadioGroup
@@ -43,7 +44,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVe
           />
         ))}
       </div>
-      <Button onClick={handleSaveSearch}>Save Search</Button>
+      <button onClick={() => handleSaveSearch(searchId)}>Save Search</button>
     </Accordion>
   );
 
