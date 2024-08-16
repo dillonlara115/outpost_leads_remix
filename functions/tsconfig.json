@@ -4,6 +4,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
+    "skipLibCheck": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,

@@ -10,11 +10,20 @@ interface Business {
   query: string;
   name: string;
   description: string;
-  full_address: string;
-  about: string;
-  photo: string;
-  logo: string;
   verified: boolean;
+  about: {
+    "From the business"?: { [key: string]: boolean };
+    Other?: { [key: string]: boolean };
+  };
+  full_address: string;
+  photo: string;
+  reviews_link: string;
+  reviews: number;
+  rating: number;
+  phone: string;
+  site: string;
+  email: string;
+  logo: string;
 }
 
 import dotenv from "dotenv";

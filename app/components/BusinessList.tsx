@@ -72,7 +72,7 @@ const BusinessList: React.FC = () => {
       setShowFilters(true);
       setSearchId(searchData.searchId);
     } catch (error) {
-      console.error('Error fetching businesses:', error);
+     // console.error('Error fetching businesses:', error);
     } finally {
       setLoading(false);
     }
