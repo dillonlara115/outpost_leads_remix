@@ -19,6 +19,7 @@ export interface Business {
   site: string;
   email: string;
   logo: string;
+  location_link: string;
 }
 
 export const fetchBusinesses = async (location: string, businessType: string): Promise<Business[]> => {

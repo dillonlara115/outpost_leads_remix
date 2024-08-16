@@ -11,6 +11,13 @@ interface Business {
   full_address: string;
   about?: any;
   verified: boolean;
+  reviews_link: string;
+  reviews: number;
+  rating: number;
+  phone: string;
+  site: string;
+  email: string;
+  logo: string;
 }
 
 interface BusinessCardProps {
@@ -51,6 +58,12 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
           <Badge size="sm" variant="light">
             {business?.verified ? 'Verified' : 'Not Verified'}
           </Badge>
+        </Group>
+        <Group>
+        <Text size="sm" mt="xs">
+          {business?.rating}
+          {business?.phone}
+        </Text>
         </Group>
         <Text size="sm" mt="xs">
           {business?.description}

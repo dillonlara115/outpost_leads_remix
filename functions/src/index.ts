@@ -24,6 +24,7 @@ interface Business {
   site: string;
   email: string;
   logo: string;
+  location_link: string;
 }
 
 import dotenv from "dotenv";
@@ -131,6 +132,13 @@ app.post("/businesses", async (req, res) => {
       photo: business.photo,
       logo: business.logo,
       verified: business.verified,
+      reviews_link: business.reviews_link,
+      reviews: business.reviews,
+      rating: business.rating,
+      phone: business.phone,
+      site: business.site,
+      location_link: business.location_link,
+      email: business.email,
     }));
 
     cache.set(cacheKey, businesses);
