@@ -40,25 +40,25 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business }) => {
   return (
     <Card withBorder radius="md" p="md" style={{ width: '100%', marginBottom: '1rem' }}>
       <Card.Section>
-        <Image src={business.photo} alt={business.name} height={180} />
-      </Card.Section>
+      <Image src={business?.photo || 'defaultImagePath.jpg'} alt={business?.name || 'Default Name'} height={180} />
+            </Card.Section>
 
       <Card.Section mt="md" p="md">
         <Group justify="apart">
           <Text size="lg">
-            {business.name}
+          {business?.name}
           </Text>
           <Badge size="sm" variant="light">
-            {business.verified ? 'Verified' : 'Not Verified'}
+            {business?.verified ? 'Verified' : 'Not Verified'}
           </Badge>
         </Group>
         <Text size="sm" mt="xs">
-          {business.description}
+          {business?.description}
         </Text>
         <Text mt="md" color="dimmed">
-          Address: {business.full_address}
+          Address: {business?.full_address}
         </Text>
-        {business.about && renderIdentifiesAs(business.about)}
+        {business?.about && renderIdentifiesAs(business?.about)}
       </Card.Section>
 
       <Group mt="xs">

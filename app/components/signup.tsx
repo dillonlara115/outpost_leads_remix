@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Title, Button, Text, Group } from '@mantine/core';
-import { auth, googleProvider, signInWithPopup, sigjnOut } from '~/lib/firebase';
+import { auth, googleProvider, signInWithPopup, signOut } from '~/lib/firebase';
 
 const Signup: React.FC = () => {
   const [user, setUser] = useState<any>(null);

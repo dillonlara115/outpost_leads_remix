@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, RadioGroup, Radio, Checkbox, Button } from '@mantine/core';
+import { Accordion, RadioGroup, Radio, Checkbox } from '@mantine/core';
 
 interface FilterAccordionProps {
   verifiedFilter: string;

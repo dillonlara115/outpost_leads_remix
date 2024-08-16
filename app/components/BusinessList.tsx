@@ -8,7 +8,8 @@ import LocationInput from './LocationInput';
 import BusinessTypeSelect from './BusinessTypeSelect';
 import FilterAccordion from './FilterAccordion';
 import BusinessesList from './BusinessesList';
-import pkg from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const ownershipOptions = [
   { value: 'Identifies as Asian-owned', label: 'Identifies as Asian-owned' },
@@ -36,7 +37,8 @@ const BusinessList: React.FC = () => {
   const [selectedOwnerships, setSelectedOwnerships] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearchId] = useState({ id: null, query: '' });
-  const { v4: uuidv4 } = pkg;
+
+
 
   useEffect(() => {
     const loadBusinessTypes = async () => {
@@ -82,7 +84,7 @@ const BusinessList: React.FC = () => {
     console.log('filtered ', filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
-const handleSaveSearch = async (searchId) => {
+const handleSaveSearch = async () => {
   const user = auth.currentUser?.uid;
 
   console.log('search object at the start of handleSaveSearch:', search);

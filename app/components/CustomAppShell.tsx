@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppShell,
   Burger,
@@ -10,10 +10,34 @@ import {
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Outlet } from "@remix-run/react";
+import { Outlet, useNavigate } from "@remix-run/react";
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase'; // Adjust the import path to your firebase config
 
 const CustomAppShell: React.FC = () => {
   const [opened, { toggle }] = useDisclosure(false);
+  const [user, setUser] = useState(null); // State to hold the current user
+  const navigate = useNavigate(); // Hook for navigation
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        // User is signed in
+        setUser(currentUser);
+      } else {
+        // No user is signed in, redirect to login
+        navigate('/login');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [navigate]);
+
+  // Optional: Loading state while checking auth state
+  if (user === undefined) {
+    return <div>Loading...</div>; // Or any loading spinner component
+  }
 
   return (
     <AppShell
@@ -32,7 +56,8 @@ const CustomAppShell: React.FC = () => {
           <Title order={4}>Menu</Title>
           <NavLink component="a" href="/businesses" label="Fetch Businesses" />
           <NavLink component="a" href="/saved-search" label="Saved Searches" />
-          <NavLink component="a" href="/signup" label="Sign Up" />
+          {/* Hide Sign Up link if user is signed in */}
+          {!user && <NavLink component="a" href="/signup" label="Sign Up" />}
         </ScrollArea>
       </AppShell.Navbar>
       <AppShell.Main>
