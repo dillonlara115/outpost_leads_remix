@@ -1,3 +1,4 @@
+import Outscraper from "outscraper";
 /* eslint-disable import/no-import-module-exports */
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -5,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import axios from "axios";
 import NodeCache from "node-cache";
+
 
 interface Business {
   query: string;
@@ -40,6 +42,7 @@ app.use(express.json());
 const cache = new NodeCache({stdTTL: 3600});
 
 const {API_KEY} = process.env;
+console.log("API Key:", API_KEY);
 
 // Static list of business types
 const businessTypes: string[] = [
@@ -60,6 +63,76 @@ const businessTypes: string[] = [
 app.get("/business-types", (req, res) => {
   res.json(businessTypes);
 });
+
+app.post("/outscraper", async (req, res) => {
+  const {location, businessType} = req.body;
+  const locationParam = location || "New York, USA";
+  const businessTypeParam = businessType || "businesses";
+
+  const cacheKey = `${locationParam}-${businessTypeParam}`;
+
+  // Check cache first
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    console.log("Serving from cache");
+    return res.json({data: cachedData});
+  }
+
+  // Check Firestore next
+  const firestoreData = await db.collection("searches").doc(cacheKey).get();
+  if (firestoreData.exists) {
+    const data = firestoreData.data();
+    cache.set(cacheKey, data); // Update cache
+    console.log("Serving from Firestore");
+    return res.json({data});
+  }
+  console.log("Fetching businesses from Outscraper API...");
+  const outscraper = new Outscraper(API_KEY);
+
+  try {
+    const response = await outscraper.googleMapsSearch(
+      [`${businessTypeParam} near ${locationParam}`],
+      3, // limit
+      "en", // language (optional)
+      "us" // region (optional)
+    );
+
+    console.log("Outscraper raw response:", JSON.stringify(response, null, 2));
+
+    // Flatten the nested response
+    const flattenedResponse = response.flat();
+
+    if (!response || !Array.isArray(response)) {
+      throw new Error("Invalid response format from Outscraper API");
+    }
+
+    const businesses = flattenedResponse.map((business: any) => ({
+      query: business.query || "",
+      name: business.name || "",
+      description: business.description || "",
+      verified: business.verified || false,
+      about: business.about || {"From the business": {}, "Other": {}},
+      full_address: business.full_address || "",
+      photo: business.photo || "",
+      reviews_link: business.reviews_link || "",
+      reviews: business.reviews || 0,
+      rating: business.rating || 0,
+      phone: business.phone || "",
+      site: business.site || "",
+      logo: business.logo || "",
+      location_link: business.location_link || "",
+    }));
+
+    cache.set(cacheKey, businesses);
+    await db.collection("searches").doc(cacheKey).set({data: businesses});
+
+    return res.json({data: businesses});
+  } catch (error) {
+    console.error("Error fetching businesses:", (error as Error)?.message || error);
+    return res.status(500).json({error: "Internal Server Error"});
+  }
+});
+
 
 app.post("/businesses", async (req, res) => {
   const {location, businessType} = req.body;

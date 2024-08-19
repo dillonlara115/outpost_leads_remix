@@ -27,21 +27,23 @@ export const fetchBusinesses = async (location: string, businessType: string): P
   const startTime = Date.now();
 
   try {
-    const response = await axios.post('https://us-central1-outpostleads-8d880.cloudfunctions.net/api/businesses', {
+    const response = await axios.post('https://us-central1-outpostleads-8d880.cloudfunctions.net/api/outscraper', {
       location,
       businessType,
     });
+    console.log("Outscraper API Response:", JSON.stringify(response.data, null, 2));
 
     console.log('Response received:', response); // Log the successful response
     const { data } = response.data;
 
-    const fetchedBusinesses: Business[] = Array.isArray(data) ? data.slice(0, 10) : [];
+    const fetchedBusinesses: Business[] = Array.isArray(data) ? data : [];
     console.log('Fetched businesses:', fetchedBusinesses);
 
     const endTime = Date.now();
     console.log(`fetchBusinesses execution time: ${endTime - startTime}ms`);
 
     return fetchedBusinesses;
+    //return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error:', error.response?.data || error.message); // Log Axios-specific errors
