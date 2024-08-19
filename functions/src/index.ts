@@ -92,7 +92,7 @@ app.post("/outscraper", async (req, res) => {
   try {
     const response = await outscraper.googleMapsSearch(
       [`${businessTypeParam} near ${locationParam}`],
-      3, // limit
+      20, // limit
       "en", // language (optional)
       "us" // region (optional)
     );

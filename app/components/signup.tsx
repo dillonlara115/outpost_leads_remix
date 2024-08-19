@@ -45,7 +45,7 @@ const Signup: React.FC = () => {
         </>
       ) : (
         <>
-          <Title order={2}>Sign Up</Title>
+          <Title order={2}>Sign Up or Login With Google</Title>
           <Group mt="md">
             <Button onClick={handleGoogleSignup}>Sign Up with Google</Button>
           </Group>
