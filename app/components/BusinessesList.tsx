@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@mantine/core';
+import { Text, Stack } from '@mantine/core';
 import { Business } from '../lib/api';
 import { BusinessCard } from './BusinessCard';
 
@@ -11,7 +11,7 @@ interface BusinessesListProps {
 
 const BusinessesList: React.FC<BusinessesListProps> = ({ businesses, userId, searchId }) => {
   return (
-    <>
+    <Stack mt="md">
       {businesses.length ? (
         businesses.map((business, index) => (
           <BusinessCard key={index} business={business} userId={userId} searchId={searchId} />
@@ -19,7 +19,7 @@ const BusinessesList: React.FC<BusinessesListProps> = ({ businesses, userId, sea
       ) : (
         <Text>No businesses found</Text>
       )}
-    </>
+    </Stack>
   );
 };
 

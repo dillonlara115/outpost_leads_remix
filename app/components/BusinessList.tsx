@@ -81,7 +81,6 @@ const BusinessList: React.FC = () => {
   useEffect(() => {
     const filtered = filterBusinesses(businesses, verifiedFilter, selectedOwnerships);
     setFilteredBusinesses(filtered);
-    console.log('filtered ', filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
 const handleSaveSearch = async () => {

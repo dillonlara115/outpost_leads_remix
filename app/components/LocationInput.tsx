@@ -13,7 +13,7 @@ interface LocationInputProps {
 }
 
 const LocationInput: React.FC<LocationInputProps> = ({ city, setCity, state, setState, country, setCountry, postalCode, setPostalCode }) => (
-    <Stack spacing="md">
+    <Stack >
       <TextInput
         placeholder="Enter city"
         value={city}
