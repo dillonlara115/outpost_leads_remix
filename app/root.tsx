@@ -2,6 +2,8 @@ import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Links, Meta, Scripts, ScrollRestoration } from "@remix-run/react";
 import CustomAppShell from '~/components/CustomAppShell';
+import AuthenticationImage from './AuthenticationImage';
+
 
 export default function App() {
   return (
