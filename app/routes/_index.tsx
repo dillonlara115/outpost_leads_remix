@@ -1,5 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
-import Signup from '~/components/signup';
+import BusinessList from "~/components/BusinessList";
 
 
 export const meta: MetaFunction = () => {
@@ -12,7 +12,7 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div>
-      <Signup />
+      <BusinessList />
     </div>
   );
 }

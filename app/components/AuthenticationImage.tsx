@@ -48,7 +48,7 @@ export function AuthenticationImage() {
         ) : (
           <>
             <Title order={2} className={classes.title} ta="center" mt="md" mb={50}>
-              Welcome back to Mantine!
+              Welcome back to Outpost Leads.
             </Title>
 
             <TextInput label="Email address" placeholder="hello@gmail.com" size="md" />

@@ -2,8 +2,8 @@ import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Links, Meta, Scripts, ScrollRestoration } from "@remix-run/react";
 import CustomAppShell from '~/components/CustomAppShell';
-import AuthenticationImage from './AuthenticationImage';
-
+import Signup from './components/signup';
+import { AuthProvider, useAuth } from '~/context/AuthContext';
 
 export default function App() {
   return (
@@ -16,11 +16,23 @@ export default function App() {
       </head>
       <body>
         <MantineProvider>
-          <CustomAppShell />
+          <AuthProvider>
+            <MainApp />
+          </AuthProvider>
         </MantineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
+}
+
+function MainApp() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return user ? <CustomAppShell /> : <Signup />;
 }

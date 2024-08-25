@@ -12,7 +12,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet, useNavigate } from "@remix-run/react";
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../lib/firebase'; // Adjust the import path to your firebase config
+import { auth, signOut } from '../lib/firebase'; // Adjust the import path to your firebase config
 
 const CustomAppShell: React.FC = () => {
   const [opened, { toggle }] = useDisclosure(false);
@@ -39,6 +39,15 @@ const CustomAppShell: React.FC = () => {
     return <div>Loading...</div>; // Or any loading spinner component
   }
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setError('');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -57,7 +66,7 @@ const CustomAppShell: React.FC = () => {
           <NavLink component="a" href="/businesses" label="Fetch Businesses" />
           <NavLink component="a" href="/saved-search" label="Saved Searches" />
           {/* Hide Sign Up link if user is signed in */}
-          {!user && <NavLink component="a" href="/signup" label="Sign Up" />}
+          {user && <NavLink component="a" label="Sign Out"  onClick={handleLogout} />}
         </ScrollArea>
       </AppShell.Navbar>
       <AppShell.Main>
