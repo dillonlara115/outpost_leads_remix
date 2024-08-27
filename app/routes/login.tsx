@@ -1,6 +1,6 @@
 // app/routes/signup.tsx
-import Signup from '~/components/signup';
+import Signin from '~/components/signin';
 
-export default function SignupPage() {
-  return <Signup />;
+export default function SigninPage() {
+  return <Signin />;
 }
