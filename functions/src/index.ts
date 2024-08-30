@@ -120,6 +120,7 @@ app.post("/outscraper", async (req, res) => {
       phone: business.phone || "",
       site: business.site || "",
       logo: business.logo || "",
+      email: business.email || "",
       location_link: business.location_link || "",
     }));
 
