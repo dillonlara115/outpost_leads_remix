@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paper, Title, TextInput, PasswordInput, Checkbox, Button, Text, Anchor } from '@mantine/core';
+import { Paper, Title, TextInput, PasswordInput, Button } from '@mantine/core';
 import classes from './signup.module.css';
 import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword } from '~/lib/firebase';
 
@@ -11,9 +11,14 @@ const Signup: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      navigate('/', { state: { fetchBusinesses: true } });
-    } catch (error) {
-      setError(error.message);
+      // Use window.location.href instead of navigate
+      window.location.href = '/';
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
@@ -21,9 +26,14 @@ const Signup: React.FC = () => {
     event.preventDefault();
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigate('/', { state: { fetchBusinesses: true } });
-    } catch (error) {
-      setError(error.message);
+      // Use window.location.href instead of navigate
+      window.location.href = '/';
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
