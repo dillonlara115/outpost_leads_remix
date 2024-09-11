@@ -20,6 +20,7 @@
     "@tabler/icons-react": "^3.11.0",
     "axios": "^1.7.2",
     "connect-session-firebase": "^11.0.0",
+    "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "express-session": "^1.18.0",
     "firebase": "^10.12.4",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@remix-run/dev": "^2.9.2",
+    "@types/cors": "^2.8.17",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",

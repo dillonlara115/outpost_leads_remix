@@ -31,9 +31,9 @@ export const fetchBusinesses = async (location: string, businessType: string): P
       location,
       businessType,
     });
-    console.log("Outscraper API Response:", JSON.stringify(response.data, null, 2));
+    console.log("Full Outscraper API Response:", response);
+    console.log("Outscraper API Response Data:", JSON.stringify(response.data, null, 2));
 
-    console.log('Response received:', response); // Log the successful response
     const { data } = response.data;
 
     const fetchedBusinesses: Business[] = Array.isArray(data) ? data : [];
@@ -43,14 +43,14 @@ export const fetchBusinesses = async (location: string, businessType: string): P
     console.log(`fetchBusinesses execution time: ${endTime - startTime}ms`);
 
     return fetchedBusinesses;
-    //return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('Axios error:', error.response?.data || error.message); // Log Axios-specific errors
+      console.error('Axios error:', error.response?.data || error.message);
+      console.error('Error config:', error.config);
     } else {
-      console.error('Unexpected error:', error); // Log non-Axios errors
+      console.error('Unexpected error:', error);
     }
-    throw error; // Re-throw the error for further handling or to indicate failure
+    throw error;
   }
 };
 
