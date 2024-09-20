@@ -150,7 +150,7 @@ const handleSaveSearch = async () => {
       ) : searchPerformed ? (
         <>
           {console.log('Rendering BusinessesList with:', { businesses: filteredBusinesses, userId: auth.currentUser?.uid, searchId })}
-          <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={searchId} />
+          <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid  ?? null} searchId={searchId} />
         </>
       ) : null}
     </Container>

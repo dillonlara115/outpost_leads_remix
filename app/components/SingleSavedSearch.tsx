@@ -1,17 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BusinessListTable } from './BusinessListTable';
+import { Business } from '../types/business';
+import { Business as APIBusiness } from '../lib/api';
 
-const SingleSavedSearch = ({ searchData }) => {
+
+const SingleSavedSearch: React.FC<{ searchData: { businesses: Business[], id: string } }> = ({ searchData }) => {
   const { businesses, id: searchId } = searchData;
 
   return (
     <div>
       {businesses && businesses.length > 0 ? (
         <BusinessListTable
-          businesses={businesses}
-          userId={null} // Assuming you have logic to get the userId
-          searchId={searchId}
+        businesses={businesses as unknown as APIBusiness[]}
+        userId={null}
+        searchId={searchId}
         />
       ) : (
         <div>No businesses found</div>

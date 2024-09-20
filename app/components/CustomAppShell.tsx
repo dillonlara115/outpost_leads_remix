@@ -14,16 +14,28 @@ import { Outlet, useNavigate, Link } from "@remix-run/react";
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signOut } from '../lib/firebase'; // Adjust the import path to your firebase config
 
+interface User {
+  // Add relevant properties, e.g.:
+  id: string;
+  name: string;
+  // ... other properties
+}
+
 const CustomAppShell: React.FC = () => {
   const [opened, { toggle }] = useDisclosure(false);
-  const [user, setUser] = useState(null); // State to hold the current user
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate(); // Hook for navigation
+  const [setError] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         // User is signed in
-        setUser(currentUser);
+        setUser({
+          id: currentUser.uid,
+          name: currentUser.displayName || '',
+          // Add other relevant properties from currentUser
+        });
       } else {
         // No user is signed in, redirect to login
         navigate('/login');
@@ -43,8 +55,8 @@ const CustomAppShell: React.FC = () => {
     try {
       await signOut(auth);
       setError('');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 

@@ -11,7 +11,7 @@ interface FilterAccordionProps {
   searchId: string; 
 }
 
-const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch, searchId}) => (
+const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch }) => (
     <Accordion label="Filters">
       <div style={{ marginBottom: '1rem' }}>
         <RadioGroup

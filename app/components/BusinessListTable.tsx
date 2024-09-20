@@ -10,7 +10,7 @@ import {
   rem,
 } from '@mantine/core';
 import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { Business } from '../lib/api';
 import { BusinessCardModal } from './BusinessCardModal';
 import classes from './TableSort.module.css';
@@ -76,7 +76,7 @@ function sortData(
   );
 }
 
-export function BusinessListTable({ businesses, userId, searchId }: BusinessListTableProps) {
+export function BusinessListTable({ businesses }: BusinessListTableProps) {
    const [search, setSearch] = useState('');
    const [sortedData, setSortedData] = useState(businesses);
    const [sortBy, setSortBy] = useState<keyof Business | null>(null);
