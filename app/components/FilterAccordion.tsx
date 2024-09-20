@@ -44,7 +44,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVe
           />
         ))}
       </div>
-      <button onClick={() => handleSaveSearch(searchId)}>Save Search</button>
+      <button onClick={() => handleSaveSearch()}>Save Search</button>
     </Accordion>
   );
 

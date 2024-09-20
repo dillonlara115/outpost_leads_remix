@@ -10,7 +10,7 @@ import {
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Outlet, useNavigate } from "@remix-run/react";
+import { Outlet, useNavigate, Link } from "@remix-run/react";
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, signOut } from '../lib/firebase'; // Adjust the import path to your firebase config
 
@@ -63,10 +63,10 @@ const CustomAppShell: React.FC = () => {
       <AppShell.Navbar p="md">
         <ScrollArea style={{ height: '100%' }}>
           <Title order={4}>Menu</Title>
-          <NavLink component="a" href="/businesses" label="Fetch Businesses" />
-          <NavLink component="a" href="/saved-search" label="Saved Searches" />
+          <NavLink component={Link} to="/businesses" label="Fetch Businesses" />
+          <NavLink component={Link} to="/saved-search" label="Saved Searches" />
           {/* Hide Sign Up link if user is signed in */}
-          {user && <NavLink component="a" label="Sign Out"  onClick={handleLogout} />}
+          {user && <NavLink component="button" label="Sign Out"  onClick={handleLogout} />}
         </ScrollArea>
       </AppShell.Navbar>
       <AppShell.Main>

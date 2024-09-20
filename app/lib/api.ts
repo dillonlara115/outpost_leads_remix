@@ -24,8 +24,6 @@ export interface Business {
 
 export const fetchBusinesses = async (location: string, businessType: string): Promise<Business[]> => {
   console.log('fetchBusinesses called with:', { location, businessType });
-  const startTime = Date.now();
-
   try {
     const response = await axios.post('https://us-central1-outpostleads-8d880.cloudfunctions.net/api/outscraper', {
       location,
@@ -35,20 +33,17 @@ export const fetchBusinesses = async (location: string, businessType: string): P
     console.log("Outscraper API Response Data:", JSON.stringify(response.data, null, 2));
 
     const { data } = response.data;
+    console.log("Extracted data:", data);
 
     const fetchedBusinesses: Business[] = Array.isArray(data) ? data : [];
-    console.log('Fetched businesses:', fetchedBusinesses);
-
-    const endTime = Date.now();
-    console.log(`fetchBusinesses execution time: ${endTime - startTime}ms`);
+    console.log('Processed fetchedBusinesses:', fetchedBusinesses);
 
     return fetchedBusinesses;
   } catch (error) {
+    console.error('Error in fetchBusinesses:', error);
     if (axios.isAxiosError(error)) {
       console.error('Axios error:', error.response?.data || error.message);
       console.error('Error config:', error.config);
-    } else {
-      console.error('Unexpected error:', error);
     }
     throw error;
   }

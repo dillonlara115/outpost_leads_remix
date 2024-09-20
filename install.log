@@ -1,0 +1,8 @@
+[10:34:09 2024-09-20] FETCHING Version 2.38.3
+[10:34:09 2024-09-20] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.38.3/spicetify-2.38.3-linux-amd64.tar.gz
+[10:34:10 2024-09-20] EXTRACTING /home/dillon/.spicetify/spicetify.tar.gz
+[10:34:10 2024-09-20] SETTING EXECUTABLE PERMISSIONS TO /home/dillon/.spicetify/spicetify
+[10:34:10 2024-09-20] REMOVING /home/dillon/.spicetify/spicetify.tar.gz
+[10:34:10 2024-09-20] APPENDING /home/dillon/.spicetify to PATH in /home/dillon/.zshrc
+[10:34:10 2024-09-20] spicetify v2.38.3 was installed successfully to /home/dillon/.spicetify
+[10:34:10 2024-09-20] Run 'spicetify --help' to get started

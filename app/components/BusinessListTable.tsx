@@ -134,7 +134,7 @@ export function BusinessListTable({ businesses, userId, searchId }: BusinessList
       />
       <Table horizontalSpacing="md" verticalSpacing="xs" miw={700} layout="fixed">
         <Table.Tbody>
-          <Table.Tr>
+        <Table.Tr key="header-row">
             <Th
               sorted={sortBy === 'name'}
               reversed={reverseSortDirection}
@@ -163,7 +163,7 @@ export function BusinessListTable({ businesses, userId, searchId }: BusinessList
           {rows.length > 0 ? (
             rows
           ) : (
-            <Table.Tr>
+            <Table.Tr key="no-data-row">
               <Table.Td colSpan={3}>
                 <Text fw={500} ta="center">
                   No businesses found

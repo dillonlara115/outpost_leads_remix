@@ -36,7 +36,10 @@ const BusinessList: React.FC = () => {
   const [verifiedFilter, setVerifiedFilter] = useState('all'); // all, verified, not_verified
   const [selectedOwnerships, setSelectedOwnerships] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [search, setSearchId] = useState({ id: null, query: '' });
+  const [searchId, setSearchId] = useState<string | null>(null);
+  const [searchPerformed, setSearchPerformed] = useState(false);
+
+
 
 
 
@@ -59,20 +62,23 @@ const BusinessList: React.FC = () => {
   const handleFetchBusinesses = async () => {
     setLoading(true);
     setShowFilters(false);
-    const searchId = uuidv4(); // Generate a unique identifier for the search
+    setSearchPerformed(false);
+    const newSearchId = uuidv4();
     try {
-      // Construct location string, handling missing parts gracefully
       const location = `${city ? `${city}, ` : ''}${state ? `${state}, ` : ''}${country ? `${country}, ` : ''}${postalCode}`.trim().replace(/, $/, '');
+      console.log('Fetching businesses with:', { location, selectedBusinessType });
       const data = await fetchBusinesses(location, selectedBusinessType);
-      // Assuming you want to store the searchId along with the fetched data
-      const searchData = { businesses: data, searchId };
-      console.log('search data', searchData);
-      setBusinesses(searchData.businesses); // Extract the businesses array
-      setFilteredBusinesses(searchData.businesses); // Initially, the filtered businesses are the same as the fetched businesses
+      console.log('Raw data from fetchBusinesses:', data);
+      setBusinesses(data);
+      setFilteredBusinesses(data);
       setShowFilters(true);
-      setSearchId(searchData.searchId);
+      setSearchId(newSearchId);
+      setSearchPerformed(true);
+      console.log('After state updates - businesses:', data);
+      console.log('After state updates - filteredBusinesses:', data);
     } catch (error) {
-     // console.error('Error fetching businesses:', error);
+      console.error('Error fetching businesses:', error);
+      setSearchPerformed(false);
     } finally {
       setLoading(false);
     }
@@ -83,26 +89,29 @@ const BusinessList: React.FC = () => {
     setFilteredBusinesses(filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
+  useEffect(() => {
+    console.log('businesses state updated:', businesses);
+  }, [businesses]);
+  
+  useEffect(() => {
+    console.log('filteredBusinesses state updated:', filteredBusinesses);
+  }, [filteredBusinesses]);
+
 const handleSaveSearch = async () => {
   const user = auth.currentUser?.uid;
 
-  console.log('search object at the start of handleSaveSearch:', search);
+    if (!user || !searchId || !businesses) {
+      console.error("Missing required data: user, searchId, or businesses are null or undefined.");
+      return;
+    }
 
-  if (!user || !search || !businesses) {
-    console.log('user', user);
-    console.log('search.id', search);
-    console.log('businesses', businesses);
-    console.error("Missing required data: user, search ID, or businesses are null or undefined.");
-    return; // Exit the function if any required data is missing
-  }
-
-  console.log("Saving search for userId:", user);
-  try {
-    await saveSearch(user, search, businesses);
-    console.log('Search saved successfully');
-  } catch (error) {
-    console.error('Error saving search:', error);
-  }
+    console.log("Saving search for userId:", user);
+    try {
+      await saveSearch(user, searchId, businesses);
+      console.log('Search saved successfully');
+    } catch (error) {
+      console.error('Error saving search:', error);
+    }
 };
 
   return (
@@ -125,7 +134,7 @@ const handleSaveSearch = async () => {
         businessTypesLoading={businessTypesLoading}
         handleFetchBusinesses={handleFetchBusinesses}
       />
-      {showFilters && (
+      {searchPerformed && showFilters && businesses.length > 0 && (
         <FilterAccordion
           verifiedFilter={verifiedFilter}
           setVerifiedFilter={setVerifiedFilter}
@@ -133,13 +142,17 @@ const handleSaveSearch = async () => {
           setSelectedOwnerships={setSelectedOwnerships}
           ownershipOptions={ownershipOptions}
           handleSaveSearch={handleSaveSearch}
+          searchId={searchId}
         />
       )}
       {loading ? (
         <Loader />
-      ) : (
-        <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={search.id} />
-      )}
+      ) : searchPerformed ? (
+        <>
+          {console.log('Rendering BusinessesList with:', { businesses: filteredBusinesses, userId: auth.currentUser?.uid, searchId })}
+          <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid} searchId={searchId} />
+        </>
+      ) : null}
     </Container>
   );
 };
