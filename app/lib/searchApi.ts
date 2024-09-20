@@ -1,17 +1,18 @@
 import axios from 'axios';
 import { doc, setDoc, serverTimestamp, getFirestore } from 'firebase/firestore'; // Import Firestore functions
-
+import { v4 as uuidv4 } from 'uuid';
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
 
-export const saveSearch = async (userId: string, search: string, businesses: BusinessType[]): Promise<string> => {
-   try {
-    // Create a unique document path for the search
-    const searchDocRef = doc(db, 'users', userId, 'savedSearches', search);
+export const saveSearch = async (userId: string, searchQuery: string, businesses: BusinessType[]): Promise<string> => {
+  try {
+    const searchId = uuidv4(); // Generate a unique ID for the search
+    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
 
     // Save the search data to the document
     await setDoc(searchDocRef, {
-      id: search,
+      id: searchId,
+      searchQuery, // Store the search query
       businesses,
       createdAt: serverTimestamp(),
     });
@@ -22,6 +23,7 @@ export const saveSearch = async (userId: string, search: string, businesses: Bus
     throw error;
   }
 };
+
 
 export const fetchSavedSearches = async (userId: string) => {
   try {
