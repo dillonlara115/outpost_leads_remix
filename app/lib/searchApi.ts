@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { doc, setDoc, serverTimestamp, getFirestore } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
 import { v4 as uuidv4 } from 'uuid';
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
-
+import { BusinessType } from '../types/businesstypes';
 export const saveSearch = async (userId: string, searchQuery: string, businesses: BusinessType[]): Promise<string> => {
   try {
     const searchId = uuidv4(); // Generate a unique ID for the search

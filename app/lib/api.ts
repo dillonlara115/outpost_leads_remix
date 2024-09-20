@@ -1,5 +1,4 @@
 import axios, { isAxiosError } from 'axios';
-
 export interface Business {
   // Define the structure of a business object based on your data
   id: string;
@@ -41,7 +40,7 @@ export const fetchBusinesses = async (location: string, businessType: string): P
     return fetchedBusinesses;
   } catch (error) {
     console.error('Error in fetchBusinesses:', error);
-    if (axios.isAxiosError(error)) {
+    if (isAxiosError(error)) {
       console.error('Axios error:', error.response?.data || error.message);
       console.error('Error config:', error.config);
     }

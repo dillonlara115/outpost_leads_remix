@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, RadioGroup, Radio, Checkbox } from '@mantine/core';
+import { Stack, RadioGroup, Radio, Checkbox } from '@mantine/core';
 
 interface FilterAccordionProps {
   verifiedFilter: string;
@@ -12,7 +12,7 @@ interface FilterAccordionProps {
 }
 
 const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch }) => (
-    <Accordion label="Filters">
+    <Stack>
       <div style={{ marginBottom: '1rem' }}>
         <RadioGroup
           label="Filter by verification status"
@@ -45,7 +45,7 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVe
         ))}
       </div>
       <button onClick={() => handleSaveSearch()}>Save Search</button>
-    </Accordion>
+    </Stack>
   );
 
 export default FilterAccordion;
