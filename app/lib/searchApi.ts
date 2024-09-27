@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore'; // Import Firestore functions
 import { v4 as uuidv4 } from 'uuid';
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
@@ -34,6 +34,17 @@ export const saveSearch = async (userId: string, searchQuery: string, businesses
   }
 };
 
+// Delete a search
+export const deleteSearch = async (userId: string, searchId: string): Promise<void> => {
+  try {
+    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
+    await deleteDoc(searchDocRef);
+    console.log('Search deleted successfully');
+  } catch (error) {
+    console.error('Error deleting search:', error);
+    throw error;
+  }
+};
 
 export const fetchSavedSearches = async (userId: string) => {
   try {
