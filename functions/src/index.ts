@@ -10,6 +10,7 @@ import NodeCache from "node-cache";
 
 interface Business {
   query: string;
+  place_id: string;
   name: string;
   description: string;
   verified: boolean;
@@ -109,6 +110,7 @@ app.post("/outscraper", async (req, res) => {
     const businesses = flattenedResponse.map((business: any) => ({
       query: business.query || "",
       name: business.name || "",
+      place_id: business.place_id || "",
       description: business.description || "",
       verified: business.verified || false,
       about: business.about || {"From the business": {}, "Other": {}},
@@ -199,6 +201,7 @@ app.post("/businesses", async (req, res) => {
 
     const businesses = businessesData.map((business: Business) => ({
       query: business.query,
+      place_id: business.place_id,
       name: business.name,
       description: business.description,
       full_address: business.full_address,

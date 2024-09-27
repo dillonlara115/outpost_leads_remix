@@ -7,10 +7,10 @@ import {
   Group,
   Badge,
   Button,
-  ActionIcon,
-} from '@mantine/core';
-import { IconHeart } from '@tabler/icons-react';
+  } from '@mantine/core';
 import { Business } from '../lib/api';
+import { useNavigate } from '@remix-run/react';
+
 
 interface BusinessCardModalProps {
   business: Business | null;
@@ -19,7 +19,8 @@ interface BusinessCardModalProps {
 }
 
 export function BusinessCardModal({ business, opened, onClose }: BusinessCardModalProps) {
-  const renderIdentifiesAs = (about: any) => {
+  const navigate = useNavigate();
+    const renderIdentifiesAs = (about: any) => {
     const fromBusiness = about?.['From the business'] || {};
     const other = about?.Other || {};
     const merged = { ...fromBusiness, ...other };
@@ -34,6 +35,19 @@ export function BusinessCardModal({ business, opened, onClose }: BusinessCardMod
         ))}
       </Group>
     );
+  };
+
+  const handleShowDetails = () => {
+    if (business) {
+      console.log('Full business object:', JSON.stringify(business, null, 2));
+      if (business.place_id) {
+        navigate(`/saved-search/business/${business.place_id}`);
+      } else {
+        console.error('Business ID is undefined. Available properties:', Object.keys(business));
+      }
+    } else {
+      console.error('Business object is null');
+    }
   };
 
   return (
@@ -76,12 +90,10 @@ export function BusinessCardModal({ business, opened, onClose }: BusinessCardMod
           </Card.Section>
 
           <Group mt="xs">
-            <Button radius="md" style={{ flex: 1 }}>
+            <Button radius="md" style={{ flex: 1 }} onClick={handleShowDetails}>
               Show details
             </Button>
-            <ActionIcon variant="default" radius="md" size={36}>
-              <IconHeart stroke={1.5} />
-            </ActionIcon>
+            
           </Group>
         </Card>
       )}

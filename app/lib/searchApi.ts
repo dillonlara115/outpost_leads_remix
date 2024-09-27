@@ -1,23 +1,33 @@
 import axios from 'axios';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore'; // Import Firestore functions
 import { v4 as uuidv4 } from 'uuid';
 // Import Firestore instance
 import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
-import { BusinessType } from '../types/businesstypes';
-export const saveSearch = async (userId: string, searchQuery: string, businesses: BusinessType[]): Promise<string> => {
-  try {
-    const searchId = uuidv4(); // Generate a unique ID for the search
-    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
+import { Business } from '../lib/api';
 
-    // Save the search data to the document
+export const saveSearch = async (userId: string, searchQuery: string, businesses: Business[]): Promise<string> => {
+  try {
+    const searchId = uuidv4();
+    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
+    const businessesCollectionRef = collection(db, 'users', userId, 'savedSearches', searchId, 'businesses');
+
+    // Save the search data
     await setDoc(searchDocRef, {
       id: searchId,
-      searchQuery, // Store the search query
-      businesses,
+      searchQuery,
       createdAt: serverTimestamp(),
     });
 
-    return 'Search saved successfully!';
+    // Save each business
+    for (const business of businesses) {
+      const businessId = business.place_id || uuidv4();
+      await setDoc(doc(businessesCollectionRef, businessId), {
+        ...business,
+        savedAt: serverTimestamp(),
+      });
+    }
+
+    return 'Search and businesses saved successfully!';
   } catch (error) {
     console.error('Error saving search:', error);
     throw error;
