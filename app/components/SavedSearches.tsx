@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link } from "@remix-run/react";
 import { getFirestore, collection, query, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import { Button, Table, Modal, Text, Group } from '@mantine/core';
+import { Button, Table, Modal, Text, Group, Stack } from '@mantine/core';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '~/lib/firebase';
 import { format } from 'date-fns';
 import { IconTrash } from '@tabler/icons-react';
 
-
 interface SavedSearch {
   id: string;
   createdAt: any; // Firestore Timestamp
-  searchQuery: string; // Add this field
+  businesses: {
+    query: string;
+    // Add other business fields if needed
+  }[];
 }
 
 const db = getFirestore();
@@ -24,7 +26,7 @@ const fetchSavedSearches = async (userId: string): Promise<SavedSearch[]> => {
   return querySnapshot.docs.map(doc => ({
     id: doc.id,
     createdAt: doc.data().createdAt,
-    searchQuery: doc.data().searchQuery,
+    businesses: doc.data().businesses || [],
     ...doc.data()
   }));
 };
@@ -53,12 +55,10 @@ const SavedSearches = () => {
     return () => unsubscribe();
   }, []);
 
-
   const handleDeleteClick = (search: SavedSearch) => {
     setSearchToDelete(search);
     setDeleteModalOpen(true);
   };
-
 
   const handleConfirmDelete = async () => {
     if (searchToDelete && auth.currentUser) {
@@ -67,7 +67,6 @@ const SavedSearches = () => {
         const searchDocRef = doc(userDocRef, "savedSearches", searchToDelete.id);
         await deleteDoc(searchDocRef);
         
-        // Update local state immediately
         setSavedSearches(prevSearches => 
           prevSearches.filter(search => search.id !== searchToDelete.id)
         );
@@ -80,26 +79,26 @@ const SavedSearches = () => {
     }
   };
 
-  
-
-
   return (
     <div>
       <h2>Saved Searches</h2>
       <Table>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Search Query</Table.Th>
+            <Table.Th>Search Details</Table.Th>
             <Table.Th>Created</Table.Th>
+            <Table.Th>Actions</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
           {savedSearches.map(search => (
             <Table.Tr key={search.id}>
               <Table.Td>
-                <Link to={`/saved-search/${search.id}`}>
-                  {search.searchQuery || 'Unnamed Search'}
-                </Link>
+                <Stack spacing="xs">
+                  <Link to={`/saved-search/${search.id}`}>               
+                  <Text>{search.businesses[0]?.query || 'N/A'}</Text>
+                  </Link>
+                </Stack>
               </Table.Td>
               <Table.Td>
                 {formatDate(search.createdAt)}
