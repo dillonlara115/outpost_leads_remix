@@ -1,9 +1,41 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data
+    }
+
+    function isAdmin() {
+      return getUserData().role == 'super_admin'
+    }
+
+    function isBetaUser() {
+      return getUserData().role == 'beta_user'
+    }
+
+    function betaUserSavedSearchCount() {
+      return getUserData().savedSearchCount
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      match /savedSearches/{searchId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if request.auth != null && request.auth.uid == userId && 
+                        (!isBetaUser() || betaUserSavedSearchCount() < 5);
+        allow update, delete: if request.auth != null && request.auth.uid == userId;
+
+        match /businesses/{businessId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+    }
+    
+    match /someProtectedCollection/{docId} {
+      allow read: if isAdmin() || isBetaUser();
+      allow write: if isAdmin();
     }
   }
 }

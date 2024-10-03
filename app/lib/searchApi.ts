@@ -1,35 +1,82 @@
-import axios from 'axios';
-import { doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore'; // Import Firestore functions
+import { 
+  doc, 
+  setDoc, 
+  serverTimestamp, 
+  collection, 
+  deleteDoc, 
+  getDoc, 
+  getDocs, 
+  query,
+  limit,
+  Timestamp
+} from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
-// Import Firestore instance
-import { db } from '../lib/firebase'; // Assuming you have a firebase.ts file with the db instance
+import { db } from '../lib/firebase';
 import { Business } from '../lib/api';
+import { UserRole } from '../lib/useAuth';
+import axios from 'axios';
 
-export const saveSearch = async (userId: string, searchQuery: string, businesses: Business[]): Promise<string> => {
+export const saveSearch = async (userId: string, searchQuery: string, businesses: Business[], userRole: UserRole): Promise<string> => {
+  console.log('Starting saveSearch function');
+  console.log('userId:', userId);
+  console.log('searchQuery:', searchQuery);
+  console.log('Number of businesses:', businesses.length);
+  console.log('userRole:', userRole);
+
   try {
-    const searchId = uuidv4();
-    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
-    const businessesCollectionRef = collection(db, 'users', userId, 'savedSearches', searchId, 'businesses');
+    const userDocRef = doc(db, 'users', userId);
+    console.log('Fetching user document');
+    const userDoc = await getDoc(userDocRef);
 
-    // Save the search data
+    if (!userDoc.exists()) {
+      throw new Error('User document does not exist');
+    }
+
+    const userData = userDoc.data();
+    console.log('User data:', userData);
+
+    if (userRole === UserRole.BETA_USER) {
+      console.log('Checking beta user saved search count');
+      const savedSearchesRef = collection(db, 'users', userId, 'savedSearches');
+      const savedSearchesQuery = query(savedSearchesRef, limit(6));
+      const savedSearchesSnapshot = await getDocs(savedSearchesQuery);
+      const actualSavedSearchCount = savedSearchesSnapshot.size;
+
+      console.log('Actual saved search count:', actualSavedSearchCount);
+
+      if (actualSavedSearchCount >= 5) {
+        throw new Error('Beta users are limited to 5 saved searches.');
+      }
+    }
+
+    const searchId = uuidv4();
+    console.log('Generated searchId:', searchId);
+
+    const searchDocRef = doc(db, 'users', userId, 'savedSearches', searchId);
+    console.log('Saving search document with businesses');
+
+    // Prepare businesses data
+    const currentTime = Timestamp.now();
+    const businessesData = businesses.map(business => ({
+      ...business,
+      savedAt: currentTime,
+    }));
+
     await setDoc(searchDocRef, {
       id: searchId,
       searchQuery,
       createdAt: serverTimestamp(),
+      businesses: businessesData,
     });
 
-    // Save each business
-    for (const business of businesses) {
-      const businessId = business.place_id || uuidv4();
-      await setDoc(doc(businessesCollectionRef, businessId), {
-        ...business,
-        savedAt: serverTimestamp(),
-      });
-    }
-
+    console.log('Search document and businesses saved successfully');
     return 'Search and businesses saved successfully!';
   } catch (error) {
     console.error('Error saving search:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     throw error;
   }
 };

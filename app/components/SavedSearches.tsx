@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from "@remix-run/react";
 import { getFirestore, collection, query, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { Button, Table, Modal, Text, Group, Stack } from '@mantine/core';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '~/lib/firebase';
-import { format } from 'date-fns';
 import { IconTrash } from '@tabler/icons-react';
+import { format } from 'date-fns';
+import useAuth, { UserRole } from '~/lib/useAuth'; // Import useAuth and UserRole
 
 interface SavedSearch {
   id: string;
@@ -18,23 +17,32 @@ interface SavedSearch {
 
 const db = getFirestore();
 
-const fetchSavedSearches = async (userId: string): Promise<SavedSearch[]> => {
-  const userDocRef = doc(db, "users", userId);
-  const savedSearchesCollectionRef = collection(userDocRef, "savedSearches");
-  const q = query(savedSearchesCollectionRef);
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    createdAt: doc.data().createdAt,
-    businesses: doc.data().businesses || [],
-    ...doc.data()
-  }));
-};
-
-const SavedSearches = () => {
+const SavedSearches: React.FC = () => {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [searchToDelete, setSearchToDelete] = useState<SavedSearch | null>(null);
+  const { user, role } = useAuth(); // Use the useAuth hook
+
+  const fetchSavedSearches = async (userId: string): Promise<SavedSearch[]> => {
+    const userDocRef = doc(db, "users", userId);
+    const savedSearchesCollectionRef = collection(userDocRef, "savedSearches");
+    const q = query(savedSearchesCollectionRef);
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      createdAt: doc.data().createdAt,
+      businesses: doc.data().businesses || [],
+      ...doc.data()
+    }));
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchSavedSearches(user.uid)
+        .then(searches => setSavedSearches(searches))
+        .catch(error => console.error("Error fetching saved searches:", error));
+    }
+  }, [user]);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '';
@@ -42,28 +50,15 @@ const SavedSearches = () => {
     return format(date, 'MMMM dd, yyyy hh:mm a');
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const searches = await fetchSavedSearches(user.uid);
-        setSavedSearches(searches);
-      } else {
-        setSavedSearches([]);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const handleDeleteClick = (search: SavedSearch) => {
     setSearchToDelete(search);
     setDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (searchToDelete && auth.currentUser) {
+    if (searchToDelete && user) {
       try {
-        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDocRef = doc(db, "users", user.uid);
         const searchDocRef = doc(userDocRef, "savedSearches", searchToDelete.id);
         await deleteDoc(searchDocRef);
         
@@ -79,9 +74,16 @@ const SavedSearches = () => {
     }
   };
 
+  if (!user) {
+    return <div>Please log in to view saved searches.</div>;
+  }
+
   return (
     <div>
       <h2>Saved Searches</h2>
+      {role === UserRole.BETA_USER && savedSearches.length >= 5 && (
+        <Text color="red">You have reached the maximum number of saved searches for beta users.</Text>
+      )}
       <Table>
         <Table.Thead>
           <Table.Tr>
@@ -91,12 +93,12 @@ const SavedSearches = () => {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {savedSearches.map(search => (
+          {savedSearches.slice(0, role === UserRole.BETA_USER ? 5 : savedSearches.length).map(search => (
             <Table.Tr key={search.id}>
               <Table.Td>
-                <Stack spacing="xs">
+                <Stack>
                   <Link to={`/saved-search/${search.id}`}>               
-                  <Text>{search.businesses[0]?.query || 'N/A'}</Text>
+                    <Text>{search.businesses[0]?.query || 'N/A'}</Text>
                   </Link>
                 </Stack>
               </Table.Td>

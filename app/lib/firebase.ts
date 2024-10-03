@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { UserRole } from './roles';
 
 const firebaseConfig = {
    apiKey: "AIzaSyC3C-SGWKjR4W5EWAAyRuUN7xxxuQ3SxMQ",
@@ -24,6 +25,25 @@ setPersistence(auth, browserLocalPersistence)
     console.error("Error setting persistence:", error);
   });
 const db = getFirestore(app);
+
+export async function getUserRole(userId: string): Promise<UserRole | null> {
+  const userDoc = await getDoc(doc(db, 'users', userId));
+  if (userDoc.exists()) {
+    return userDoc.data().role as UserRole;
+  }
+  return null;
+}
+
+export function onAuthStateChangedWithRole(callback: (user: any, role: UserRole | null) => void) {
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const role = await getUserRole(user.uid);
+      callback(user, role);
+    } else {
+      callback(null, null);
+    }
+  });
+}
 
 const googleProvider = new GoogleAuthProvider();
 

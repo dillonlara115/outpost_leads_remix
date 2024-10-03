@@ -1,5 +1,5 @@
-import React from 'react';
-import { Stack, RadioGroup, Radio, Checkbox } from '@mantine/core';
+import React, { useEffect } from 'react';
+import { Stack, RadioGroup, Radio, Checkbox, Button } from '@mantine/core';
 
 interface FilterAccordionProps {
   verifiedFilter: string;
@@ -8,18 +8,28 @@ interface FilterAccordionProps {
   setSelectedOwnerships: (value: string[]) => void;
   ownershipOptions: { value: string; label: string }[];
   handleSaveSearch: () => void;
-  searchId: string; 
+  searchId: string;
 }
 
-const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVerifiedFilter, selectedOwnerships, setSelectedOwnerships, ownershipOptions, handleSaveSearch }) => (
+const FilterAccordion: React.FC<FilterAccordionProps> = ({
+  verifiedFilter,
+  setVerifiedFilter,
+  selectedOwnerships,
+  setSelectedOwnerships,
+  ownershipOptions,
+  handleSaveSearch,
+}) => {
+  
+  return (
     <Stack>
+     
       <div style={{ marginBottom: '1rem' }}>
         <RadioGroup
           label="Filter by verification status"
           value={verifiedFilter}
           onChange={setVerifiedFilter}
           size="sm"
-          style={{ marginBottom: '1rem' }} // Adjust spacing around RadioGroup
+          style={{ marginBottom: '1rem' }}
         >
           <Radio value="all" label="All businesses" />
           <Radio value="verified" label="Verified businesses" />
@@ -40,12 +50,17 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({ verifiedFilter, setVe
                   : prev.filter((v) => v !== option.value)
               )
             }
-            style={{ marginBottom: '0.5rem' }} // Adjust spacing between Checkboxes
+            style={{ marginBottom: '0.5rem' }}
           />
         ))}
       </div>
-      <button onClick={() => handleSaveSearch()}>Save Search</button>
+      <Button 
+        onClick={handleSaveSearch} 
+      >
+        Save Search
+      </Button>
     </Stack>
   );
+};
 
 export default FilterAccordion;
