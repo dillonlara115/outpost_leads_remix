@@ -152,8 +152,6 @@ const BusinessList: React.FC = () => {
   }
 
   const isBetaUser = role === UserRole.BETA_USER;
-  const canSaveSearch = !isBetaUser || savedSearchCount < 5;
-
 
   return (
     <Container>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Select, Button, Loader, Stack } from '@mantine/core';
 import { BusinessType } from '../lib/businessTypesApi';
-import { auth } from '~/lib/firebase';
 import { getFirestore, collection, query, getDocs } from 'firebase/firestore';
 import useAuth, { UserRole } from '~/lib/useAuth';
 

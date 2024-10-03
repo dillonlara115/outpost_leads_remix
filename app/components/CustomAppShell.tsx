@@ -2,8 +2,6 @@ import React from 'react';
 import { AppShell, Group, Burger, Text, ScrollArea, NavLink, Box, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link, useNavigate, Outlet } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { auth } from '~/lib/firebase';
 import useAuth, { UserRole } from '~/lib/useAuth'; // Import the useAuth hook
 
 const CustomAppShell: React.FC = () => {

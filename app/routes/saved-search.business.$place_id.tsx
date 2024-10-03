@@ -1,9 +1,8 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Business, fetchBusinessFromDB } from "../lib/api";
-import { getAuth } from "firebase/auth";
+import {  fetchBusinessFromDB } from "../lib/api";
 
-export const loader: LoaderFunction = async ({ params, request }) => {
+export const loader: LoaderFunction = async ({ params }) => {
     console.log("Received params:", params);
     const { place_id } = params;
     if (!place_id) {

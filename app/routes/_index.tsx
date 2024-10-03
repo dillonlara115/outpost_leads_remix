@@ -1,5 +1,4 @@
 import { useAuth } from '~/context/AuthContext';
-import { redirect } from '@remix-run/node';
 import BusinessList from "~/components/BusinessList";
 import Signup from '~/components/signup';
 

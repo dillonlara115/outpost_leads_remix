@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { auth, googleProvider, signInWithPopup } from '../lib/firebase';
+import { auth, googleProvider, signInWithPopup, db } from '../lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',

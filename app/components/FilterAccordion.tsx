@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Stack, RadioGroup, Radio, Checkbox, Button } from '@mantine/core';
 
 interface FilterAccordionProps {

@@ -105,7 +105,6 @@ export function BusinessListTable({ businesses }: BusinessListTableProps) {
    const [sortedData, setSortedData] = useState(businesses);
    const [sortBy, setSortBy] = useState<keyof Business | null>(null);
    const [reverseSortDirection, setReverseSortDirection] = useState(false);
-   const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
    const [opened, { open, close }] = useDisclosure(false);
  
   const setSorting = (field: keyof Business) => {
