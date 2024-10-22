@@ -8,13 +8,57 @@ import {
   getDocs, 
   query,
   limit,
-  Timestamp
+  updateDoc,
+  Timestamp,
+  increment
 } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../lib/firebase';
 import { Business } from '../lib/api';
 import { UserRole } from '../lib/useAuth';
 import axios from 'axios';
+
+export const MONTHLY_SEARCH_LIMITS = {
+  [UserRole.BETA_USER]:10,
+  [UserRole.PAID_USER]: 100,
+  [UserRole.SUPER_ADMIN]: Infinity
+};
+
+
+export async function updateSearchCount(userId: string): Promise<number> {
+  const userRef = doc(db, 'users', userId);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    // Initialize user document with default search limit
+    await setDoc(userRef, { 
+      remainingSearches: MONTHLY_SEARCH_LIMITS,
+      // ... other user data ...
+    });
+  }
+
+  // Decrement remaining searches
+  await setDoc(userRef, { 
+    remainingSearches: increment(-1) 
+  }, { merge: true });
+
+  // Fetch updated user data
+  const updatedUserDoc = await getDoc(userRef);
+  return updatedUserDoc.data()?.remainingSearches || 0;
+}
+
+export async function performSearch(userId: string, searchParams: any) {
+  // Perform the search operation
+  const results = await actualSearchFunction(searchParams);
+
+  if (results.length > 0) {
+    // Only update the search count if there are results
+    const remainingSearches = await updateSearchCount(userId);
+    return { results, remainingSearches };
+  }
+
+  return { results, remainingSearches: null };
+}
 
 export const saveSearch = async (userId: string, searchQuery: string, businesses: Business[], userRole: UserRole): Promise<string> => {
   console.log('Starting saveSearch function');
@@ -34,6 +78,26 @@ export const saveSearch = async (userId: string, searchQuery: string, businesses
 
     const userData = userDoc.data();
     console.log('User data:', userData);
+
+    const now = new Date();
+    const monthlySearches = userData.monthlySearches || { count: 0, lastResetDate: now };
+
+    if (new Date(monthlySearches.lastResetDate.toDate()).getMonth() !== now.getMonth()) {
+      // Reset count if it's a new month
+      monthlySearches.count = 0;
+      monthlySearches.lastResetDate = now;
+    }
+
+    if (monthlySearches.count >= MONTHLY_SEARCH_LIMITS[userRole]) {
+      throw new Error(`You have reached the monthly search limit of ${MONTHLY_SEARCH_LIMITS[userRole]} for your user role.`);
+    }
+
+    // Increment the monthly search count
+    monthlySearches.count += 1;
+
+    // Update user document with new monthly search count
+    await updateDoc(userDocRef, { monthlySearches });
+
 
     if (userRole === UserRole.BETA_USER) {
       console.log('Checking beta user saved search count');

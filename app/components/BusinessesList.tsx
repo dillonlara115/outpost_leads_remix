@@ -6,11 +6,25 @@ interface BusinessesListProps {
   businesses: Business[];
   userId: string | null;
   searchId: string | null;
+  verifiedFilter: string;
+  selectedOwnerships: string[];
 }
 
-const BusinessesList: React.FC<BusinessesListProps> = ({ businesses, userId, searchId }) => {
+const BusinessesList: React.FC<BusinessesListProps> = ({ 
+  businesses, 
+  userId, 
+  searchId, 
+  verifiedFilter, 
+  selectedOwnerships 
+}) => {
   return (
-    <BusinessListTable businesses={businesses} userId={userId} searchId={searchId} />
+    <BusinessListTable 
+      businesses={businesses} 
+      userId={userId} 
+      searchId={searchId} 
+      verifiedFilter={verifiedFilter} 
+      selectedOwnerships={selectedOwnerships} 
+    />
   );
 };
 

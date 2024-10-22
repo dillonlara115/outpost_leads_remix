@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Table,
   ScrollArea,
@@ -17,10 +17,13 @@ import { useDisclosure } from '@mantine/hooks';
 import { Business } from '../lib/api';
 import classes from './TableSort.module.css';
 
+
 interface BusinessListTableProps {
   businesses: Business[];
   userId: string | null;
   searchId: string | null;
+  verifiedFilter: string;
+  selectedOwnerships: string[];
 }
 
 interface ThProps {
@@ -67,6 +70,8 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
+
+
 function filterData(data: Business[], search: string) {
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
@@ -100,12 +105,33 @@ function sortData(
   );
 }
 
-export function BusinessListTable({ businesses }: BusinessListTableProps) {
+export function BusinessListTable({ businesses, verifiedFilter, selectedOwnerships }: BusinessListTableProps) {
    const [search, setSearch] = useState('');
    const [sortedData, setSortedData] = useState(businesses);
    const [sortBy, setSortBy] = useState<keyof Business | null>(null);
    const [reverseSortDirection, setReverseSortDirection] = useState(false);
    const [opened, { open, close }] = useDisclosure(false);
+
+   useEffect(() => {
+    const filteredData = businesses.filter(business => {
+      // Apply verified filter
+      if (verifiedFilter === 'verified' && !business.verified) return false;
+      if (verifiedFilter === 'not_verified' && business.verified) return false;
+
+      // Apply ownership filter
+      if (selectedOwnerships.length > 0) {
+        const businessOwnerships = getOwnershipStatus(business);
+        if (!selectedOwnerships.some(ownership => businessOwnerships.includes(ownership))) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    setSortedData(sortData(filteredData, { sortBy, reversed: reverseSortDirection, search }));
+  }, [businesses, verifiedFilter, selectedOwnerships, sortBy, reverseSortDirection, search]);
+
  
   const setSorting = (field: keyof Business) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;

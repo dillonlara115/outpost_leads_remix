@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Container, Title, Loader, Text } from '@mantine/core';
 import { fetchBusinesses, filterBusinesses, Business } from '../lib/api';
 import { fetchBusinessTypes, BusinessType } from '../lib/businessTypesApi';
-import { saveSearch } from '../lib/searchApi';
+import { saveSearch, MONTHLY_SEARCH_LIMITS } from '../lib/searchApi';
 import useAuth, { UserRole } from '~/lib/useAuth';
 import LocationInput from './LocationInput';
-import { getFirestore, collection, query, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
 import BusinessTypeSelect from './BusinessTypeSelect';
 import FilterAccordion from './FilterAccordion';
 import BusinessesList from './BusinessesList';
@@ -44,6 +44,7 @@ const BusinessList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user, role } = useAuth();
   const [savedSearchCount, setSavedSearchCount] = useState<number>(0);
+  const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchSavedSearchCount = async () => {
@@ -65,6 +66,37 @@ const BusinessList: React.FC = () => {
     }
   }, [user, loading]);
 
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const db = getFirestore();
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          const userData = userDoc.data();
+          if (userData && userData.monthlySearches) {
+            const now = new Date();
+            const lastResetDate = userData.monthlySearches.lastResetDate.toDate();
+            if (lastResetDate.getMonth() !== now.getMonth()) {
+              setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
+            } else {
+              setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole] - userData.monthlySearches.count);
+            }
+          } else {
+            setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
+          }
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          setError('Failed to fetch user data');
+        }
+      }
+    };
+  
+    if (user && !loading) {
+      fetchUserData();
+    }
+  }, [user, loading, role]);
 
   useEffect(() => {
     const loadBusinessTypes = async () => {
@@ -198,14 +230,26 @@ const BusinessList: React.FC = () => {
         <Loader />
       ) : searchPerformed ? (
         <>
-          {console.log('Rendering BusinessesList with:', { businesses: filteredBusinesses, userId: auth.currentUser?.uid, searchId })}
-          <BusinessesList businesses={filteredBusinesses} userId={auth.currentUser?.uid  ?? null} searchId={searchId} />
+{console.log('Rendering BusinessesList with:', { 
+      businesses: filteredBusinesses, 
+      userId: auth.currentUser?.uid, 
+      searchId,
+      verifiedFilter,
+      selectedOwnerships
+    })}          <BusinessesList 
+    businesses={filteredBusinesses} 
+    userId={auth.currentUser?.uid ?? null} 
+    searchId={searchId}
+    verifiedFilter={verifiedFilter}
+    selectedOwnerships={selectedOwnerships}
+  />
         </>
       ) : null}
 
 <Text size="sm">
-        User Role: {role || 'Not set'}, Saved Searches: {savedSearchCount}
-      </Text>
+  User Role: {role || 'Not set'}, Saved Searches: {savedSearchCount}, 
+  Remaining Monthly Searches: {remainingSearches !== null ? remainingSearches : 'Loading...'}
+</Text>
     </Container>
   );
 };
