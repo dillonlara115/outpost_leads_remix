@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Container, Title, Loader, Text } from '@mantine/core';
 import { fetchBusinesses, filterBusinesses, Business } from '../lib/api';
 import { fetchBusinessTypes, BusinessType } from '../lib/businessTypesApi';
@@ -12,7 +12,6 @@ import BusinessesList from './BusinessesList';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from '~/lib/firebase';
 import { Link } from '@remix-run/react';
-
 
 const ownershipOptions = [
   { value: 'Identifies as Asian-owned', label: 'Identifies as Asian-owned' },
@@ -31,12 +30,12 @@ const BusinessList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
-  const [country, setCountry] = useState('United States'); // Default to United States
+  const [country, setCountry] = useState('United States');
   const [postalCode, setPostalCode] = useState('');
   const [businessTypes, setBusinessTypes] = useState<BusinessType[]>([]);
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
   const [businessTypesLoading, setBusinessTypesLoading] = useState(true);
-  const [verifiedFilter, setVerifiedFilter] = useState('all'); // all, verified, not_verified
+  const [verifiedFilter, setVerifiedFilter] = useState('all');
   const [selectedOwnerships, setSelectedOwnerships] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [searchId, setSearchId] = useState<string | null>(null);
@@ -46,63 +45,56 @@ const BusinessList: React.FC = () => {
   const [savedSearchCount, setSavedSearchCount] = useState<number>(0);
   const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchSavedSearchCount = async () => {
-      if (user) {
-        try {
-          const db = getFirestore();
-          const savedSearchesRef = collection(db, 'users', user.uid, 'savedSearches');
-          const savedSearchesSnapshot = await getDocs(query(savedSearchesRef));
-          setSavedSearchCount(savedSearchesSnapshot.size);
-        } catch (err) {
-          console.error('Error fetching saved search count:', err);
-          setError('Failed to fetch saved search count');
-        }
+  const fetchSavedSearchCount = useCallback(async () => {
+    if (user) {
+      try {
+        const db = getFirestore();
+        const savedSearchesRef = collection(db, 'users', user.uid, 'savedSearches');
+        const savedSearchesSnapshot = await getDocs(query(savedSearchesRef));
+        setSavedSearchCount(savedSearchesSnapshot.size);
+      } catch (err) {
+        console.error('Error fetching saved search count:', err);
+        setError('Failed to fetch saved search count');
       }
-    };
+    }
+  }, [user]);
 
+  const fetchUserData = useCallback(async () => {
+    if (user) {
+      try {
+        const db = getFirestore();
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+        if (userData && userData.monthlySearches) {
+          const now = new Date();
+          const lastResetDate = userData.monthlySearches.lastResetDate.toDate();
+          if (lastResetDate.getMonth() !== now.getMonth()) {
+            setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
+          } else {
+            setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole] - userData.monthlySearches.count);
+          }
+        } else {
+          setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        setError('Failed to fetch user data');
+      }
+    }
+  }, [user, role]);
+
+  useEffect(() => {
     if (user && !loading) {
       fetchSavedSearchCount();
-    }
-  }, [user, loading]);
-
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        try {
-          const db = getFirestore();
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          const userData = userDoc.data();
-          if (userData && userData.monthlySearches) {
-            const now = new Date();
-            const lastResetDate = userData.monthlySearches.lastResetDate.toDate();
-            if (lastResetDate.getMonth() !== now.getMonth()) {
-              setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
-            } else {
-              setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole] - userData.monthlySearches.count);
-            }
-          } else {
-            setRemainingSearches(MONTHLY_SEARCH_LIMITS[role as UserRole]);
-          }
-        } catch (err) {
-          console.error('Error fetching user data:', err);
-          setError('Failed to fetch user data');
-        }
-      }
-    };
-  
-    if (user && !loading) {
       fetchUserData();
     }
-  }, [user, loading, role]);
+  }, [user, loading, fetchSavedSearchCount, fetchUserData]);
 
   useEffect(() => {
     const loadBusinessTypes = async () => {
       try {
         const types = await fetchBusinessTypes();
-        console.log('Fetched business types:', types);
         setBusinessTypes(types);
       } catch (error) {
         console.error('Error fetching business types:', error);
@@ -114,8 +106,6 @@ const BusinessList: React.FC = () => {
     loadBusinessTypes();
   }, []);
 
-
-
   const handleFetchBusinesses = async () => {
     setLoading(true);
     setShowFilters(false);
@@ -123,7 +113,6 @@ const BusinessList: React.FC = () => {
     const newSearchId = uuidv4();
     try {
       const location = `${city ? `${city}, ` : ''}${state ? `${state}, ` : ''}${country ? `${country}, ` : ''}${postalCode}`.trim().replace(/, $/, '');
-      console.log('Fetching businesses with:', { location, selectedBusinessType });
       const data = await fetchBusinesses(location, selectedBusinessType);
       setBusinesses(data);
       setFilteredBusinesses(data);
@@ -143,22 +132,6 @@ const BusinessList: React.FC = () => {
     setFilteredBusinesses(filtered);
   }, [verifiedFilter, selectedOwnerships, businesses]);
 
-  useEffect(() => {
-    console.log('businesses state updated:', businesses);
-  }, [businesses]);
-  
-  useEffect(() => {
-    console.log('filteredBusinesses state updated:', filteredBusinesses);
-  }, [filteredBusinesses]);
-
-
-
-  useEffect(() => {
-    console.log('BusinessList - Current user role:', role);
-    console.log('BusinessList - Current saved search count:', savedSearchCount);
-  }, [role, savedSearchCount]);
-
-
   const handleSaveSearch = async () => {
     if (role === UserRole.BETA_USER && savedSearchCount >= 5) {
       setError("You've reached the maximum number of saved searches for beta users.");
@@ -175,13 +148,9 @@ const BusinessList: React.FC = () => {
       }
     }
   };
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   const isBetaUser = role === UserRole.BETA_USER;
 
@@ -229,27 +198,19 @@ const BusinessList: React.FC = () => {
       {loading ? (
         <Loader />
       ) : searchPerformed ? (
-        <>
-{console.log('Rendering BusinessesList with:', { 
-      businesses: filteredBusinesses, 
-      userId: auth.currentUser?.uid, 
-      searchId,
-      verifiedFilter,
-      selectedOwnerships
-    })}          <BusinessesList 
-    businesses={filteredBusinesses} 
-    userId={auth.currentUser?.uid ?? null} 
-    searchId={searchId}
-    verifiedFilter={verifiedFilter}
-    selectedOwnerships={selectedOwnerships}
-  />
-        </>
+        <BusinessesList 
+          businesses={filteredBusinesses} 
+          userId={auth.currentUser?.uid ?? null} 
+          searchId={searchId}
+          verifiedFilter={verifiedFilter}
+          selectedOwnerships={selectedOwnerships}
+        />
       ) : null}
 
-<Text size="sm">
-  User Role: {role || 'Not set'}, Saved Searches: {savedSearchCount}, 
-  Remaining Monthly Searches: {remainingSearches !== null ? remainingSearches : 'Loading...'}
-</Text>
+      <Text size="sm">
+        User Role: {role || 'Not set'}, Saved Searches: {savedSearchCount}, 
+        Remaining Monthly Searches: {remainingSearches !== null ? remainingSearches : 'Loading...'}
+      </Text>
     </Container>
   );
 };
