@@ -1,31 +1,10 @@
 import React from 'react';
-import { Business } from '../lib/api';
-import { BusinessListTable } from './BusinessListTable';
+import { BusinessListTable, BusinessListTableProps } from './BusinessListTable';
 
-interface BusinessesListProps {
-  businesses: Business[];
-  userId: string | null;
-  searchId: string | null;
-  verifiedFilter: string;
-  selectedOwnerships: string[];
-}
+type BusinessesListProps = BusinessListTableProps;
 
-const BusinessesList: React.FC<BusinessesListProps> = ({ 
-  businesses, 
-  userId, 
-  searchId, 
-  verifiedFilter, 
-  selectedOwnerships 
-}) => {
-  return (
-    <BusinessListTable 
-      businesses={businesses} 
-      userId={userId} 
-      searchId={searchId} 
-      verifiedFilter={verifiedFilter} 
-      selectedOwnerships={selectedOwnerships} 
-    />
-  );
-};
+const BusinessesList: React.FC<BusinessesListProps> = (props) => (
+  <BusinessListTable {...props} />
+);
 
 export default BusinessesList;

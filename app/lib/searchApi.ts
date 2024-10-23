@@ -25,26 +25,29 @@ export const MONTHLY_SEARCH_LIMITS = {
 };
 
 
-export async function updateSearchCount(userId: string): Promise<number> {
+export async function updateSearchCount(userId: string, userRole: UserRole): Promise<number> {
   const userRef = doc(db, 'users', userId);
   const userDoc = await getDoc(userRef);
 
-  if (!userDoc.exists()) {
-    // Initialize user document with default search limit
-    await setDoc(userRef, { 
-      remainingSearches: MONTHLY_SEARCH_LIMITS,
-      // ... other user data ...
-    });
+  const now = new Date();
+  let monthlySearches = userDoc.exists() ? userDoc.data().monthlySearches : null;
+
+  if (!monthlySearches || new Date(monthlySearches.lastResetDate.toDate()).getMonth() !== now.getMonth()) {
+    // Initialize or reset monthly searches
+    monthlySearches = { count: 0, lastResetDate: Timestamp.fromDate(now) };
   }
 
-  // Decrement remaining searches
-  await setDoc(userRef, { 
-    remainingSearches: increment(-1) 
-  }, { merge: true });
+  if (monthlySearches.count >= MONTHLY_SEARCH_LIMITS[userRole]) {
+    throw new Error(`Monthly search limit of ${MONTHLY_SEARCH_LIMITS[userRole]} reached.`);
+  }
 
-  // Fetch updated user data
-  const updatedUserDoc = await getDoc(userRef);
-  return updatedUserDoc.data()?.remainingSearches || 0;
+  // Increment the count
+  monthlySearches.count += 1;
+
+  // Update the user document
+  await setDoc(userRef, { monthlySearches }, { merge: true });
+
+  return MONTHLY_SEARCH_LIMITS[userRole] - monthlySearches.count;
 }
 
 export async function performSearch(userId: string, searchParams: any) {
@@ -80,12 +83,11 @@ export const saveSearch = async (userId: string, searchQuery: string, businesses
     console.log('User data:', userData);
 
     const now = new Date();
-    const monthlySearches = userData.monthlySearches || { count: 0, lastResetDate: now };
+    let monthlySearches = userData.monthlySearches || { count: 0, lastResetDate: Timestamp.fromDate(now) };
 
-    if (new Date(monthlySearches.lastResetDate.toDate()).getMonth() !== now.getMonth()) {
-      // Reset count if it's a new month
-      monthlySearches.count = 0;
-      monthlySearches.lastResetDate = now;
+    if (!monthlySearches.lastResetDate || new Date(monthlySearches.lastResetDate.toDate()).getMonth() !== now.getMonth()) {
+      // Reset count if it's a new month or if lastResetDate doesn't exist
+      monthlySearches = { count: 0, lastResetDate: Timestamp.fromDate(now) };
     }
 
     if (monthlySearches.count >= MONTHLY_SEARCH_LIMITS[userRole]) {

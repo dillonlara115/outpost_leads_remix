@@ -8,7 +8,6 @@ interface FilterAccordionProps {
   setSelectedOwnerships: (value: string[]) => void;
   ownershipOptions: { value: string; label: string }[];
   handleSaveSearch: () => void;
-  searchId: string;
 }
 
 const FilterAccordion: React.FC<FilterAccordionProps> = ({
@@ -19,44 +18,39 @@ const FilterAccordion: React.FC<FilterAccordionProps> = ({
   ownershipOptions,
   handleSaveSearch,
 }) => {
-  
+  const handleOwnershipChange = (value: string, checked: boolean) => {
+    setSelectedOwnerships((prev) =>
+      checked
+        ? [...prev, value]
+        : prev.filter((v) => v !== value)
+    );
+  };
+
   return (
-    <Stack>
-     
-      <div style={{ marginBottom: '1rem' }}>
-        <RadioGroup
-          label="Filter by verification status"
-          value={verifiedFilter}
-          onChange={setVerifiedFilter}
-          size="sm"
-          style={{ marginBottom: '1rem' }}
-        >
-          <Radio value="all" label="All businesses" />
-          <Radio value="verified" label="Verified businesses" />
-          <Radio value="not_verified" label="Not verified businesses" />
-        </RadioGroup>
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
+    <Stack spacing="md">
+      <RadioGroup
+        label="Filter by verification status"
+        value={verifiedFilter}
+        onChange={setVerifiedFilter}
+        size="sm"
+      >
+        <Radio value="all" label="All businesses" />
+        <Radio value="verified" label="Verified businesses" />
+        <Radio value="not_verified" label="Not verified businesses" />
+      </RadioGroup>
+
+      <Stack spacing="xs">
         {ownershipOptions.map((option) => (
           <Checkbox
             key={option.value}
             label={option.label}
-            value={option.value}
             checked={selectedOwnerships.includes(option.value)}
-            onChange={(event) =>
-              setSelectedOwnerships((prev) =>
-                event.currentTarget.checked
-                  ? [...prev, option.value]
-                  : prev.filter((v) => v !== option.value)
-              )
-            }
-            style={{ marginBottom: '0.5rem' }}
+            onChange={(event) => handleOwnershipChange(option.value, event.currentTarget.checked)}
           />
         ))}
-      </div>
-      <Button 
-        onClick={handleSaveSearch} 
-      >
+      </Stack>
+
+      <Button onClick={handleSaveSearch}>
         Save Search
       </Button>
     </Stack>
