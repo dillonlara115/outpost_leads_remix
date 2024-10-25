@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppShell, Group, Burger, Text, ScrollArea, NavLink, Box, Title } from '@mantine/core';
+import { AppShell, Group, Burger, Text, ScrollArea, NavLink, Box, Title, Pill } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link, useNavigate, Outlet } from 'react-router-dom';
 import useAuth, { UserRole } from '~/lib/useAuth'; // Import the useAuth hook
@@ -41,15 +41,15 @@ const CustomAppShell: React.FC = () => {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" position="apart">
+        <Group h="100%" px="md" grow>
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Text>Outpost Leads</Text>
+            <img src="/outpostleads-logo.png" alt="Outpost Logo" height={50} />
           </Group>
           {user && (
-            <Group>
-              <Text>Role: {getRoleName(role)}</Text>
+            <Group  justify="flex-end">
               <Text>{user.displayName || user.email}</Text>
+              <Pill>{getRoleName(role)}</Pill>
             </Group>
           )}
         </Group>

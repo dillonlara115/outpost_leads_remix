@@ -156,10 +156,12 @@ const BusinessList: React.FC = () => {
 
   return (
     <Container>
-      <Title order={2} mb="md">Fetch Business Leads</Title>
+      <Title order={2}>Fetch Business Leads</Title>
+      <Text  c="dimmed" mb="md">Remaining Monthly Searches: {remainingSearches !== null ? remainingSearches : 'Loading...'}
+      </Text>
 
       {isBetaUser && savedSearchCount >= 5 && (
-        <Text color="red" size="sm">
+        <Text color="red" size="sm" mb="sm">
           You have reached the maximum number of saved searches (5) for beta users. 
           Please <Link to="/saved-search">delete a saved search</Link> to save a new one.
         </Text>
@@ -207,10 +209,6 @@ const BusinessList: React.FC = () => {
         />
       ) : null}
 
-      <Text size="sm">
-        User Role: {role || 'Not set'}, Saved Searches: {savedSearchCount}, 
-        Remaining Monthly Searches: {remainingSearches !== null ? remainingSearches : 'Loading...'}
-      </Text>
     </Container>
   );
 };
